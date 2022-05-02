@@ -1,0 +1,15 @@
+{
+  "xx": {
+    "actionList": [
+      {
+        "action": " spawn",
+        "delay": 0
+      },
+      {
+        "action": " kill",
+        "delay": 100
+      }
+    ],
+    "comment": "测试"
+  }
+}

@@ -1,0 +1,94 @@
+//global_storage.scl
+global_files_type = {};
+global_shared_files_type = {};
+global_shared_file_name = 'shared_files_type';
+global_save_interval = 12000;
+global_auto_save = false;
+
+__storage_handle_start(shared_file_name) ->
+{
+    global_shared_file_name = shared_file_name;
+    load_data();
+};
+
+__storage_handle_close() ->
+{
+    save_data();
+};
+
+get_data(key, ...args) ->
+{
+    if(length(args) > 0,
+        data = system_variable_get(key, args:0);,
+        data = system_variable_get(key);
+    );
+    return(data);
+};
+
+set_data(key, value) ->
+{
+    system_variable_set(key, value);
+    file_type = __get_storage_type(type(value));
+    if(!has(global_files_type:key), put(global_files_type, key, ''));
+    global_files_type:key = file_type;
+};
+
+set_shared_data(key, value) ->
+{
+    system_variable_set(key, value);
+    file_type = __get_storage_type(type(value));
+    if(!has(global_shared_files_type:key), put(global_shared_files_type, key, ''));
+    global_shared_files_type:key = 'shared_' + file_type;
+};
+
+__get_storage_type(type) -> {'nbt' -> 'nbt', 'map' -> 'json', 'string' -> 'text'}:type;
+
+set_auto_save(toggle) ->
+{
+    if(!global_auto_save && toggle,
+        global_auto_save = toggle;
+        __tick_save_data();,
+        global_auto_save = toggle;
+    );
+};
+
+__tick_save_data() ->
+{
+    if(!global_auto_save, return());
+    save_data();
+    schedule(global_save_interval, '__tick_save_data');
+};
+
+save_data() ->
+{
+    write_file('files_type', 'json', global_files_type);
+    for(pairs(global_files_type),
+        [key, file_type] = _;
+        data = system_variable_get(key);
+        write_file(key, file_type, data);
+    );
+    write_file(global_shared_file_name, 'shared_json', global_shared_files_type);
+    for(pairs(global_shared_files_type),
+        [key, file_type] = _;
+        data = system_variable_get(key);
+        write_file(key, file_type, data);
+    );
+};
+
+load_data() ->
+{
+    data = read_file('files_type', 'json');
+    global_files_type = if(data, data, {});
+    for(pairs(global_files_type),
+        [key, file_type] = _;
+        data = read_file(key, file_type);
+        system_variable_set(key, data);
+    );
+    data = read_file(global_shared_file_name, 'shared_json');
+    global_shared_files_type = if(data, data, {});
+    for(pairs(global_shared_files_type),
+        [key, file_type] = _;
+        data = read_file(key, file_type);
+        system_variable_set(key, data);
+    );
+};

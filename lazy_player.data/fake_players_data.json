@@ -1,0 +1,27 @@
+{
+  "Example": {
+    "actionList": [
+      {
+        "action": "player Example spawn at -108.547877832 6 -31.1186625038 facing 177.563690186 15.08319664 in overworld",
+        "delay": 0
+      },
+      {
+        "action": "tellraw @a [\"<\",{\"selector\":\"@a[name=Example]\"},\"> 老子闪亮登场~~~\"]",
+        "delay": 10
+      },
+      {
+        "action": "player Example jump continuous",
+        "delay": 20
+      },
+      {
+        "action": "tellraw @a [\"<\",{\"selector\":\"@a[name=Example]\"},\"> 溜了溜了\"]",
+        "delay": 60
+      },
+      {
+        "action": "player Example kill",
+        "delay": 10
+      }
+    ],
+    "comment": "示例假人，通过lazy_player invoke Example调用"
+  }
+}
